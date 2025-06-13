@@ -25,7 +25,7 @@ def get_files_info(working_directory, directory=None):
             return ('\n').join(final_list)
         
         # We now can store the absolute path 
-        directory = os.path.abspath(directory)
+        directory = os.path.abspath(os.path.join(working_directory, directory))
 
         # Check if the directory is inside the working directory, or print an error
         if not directory.startswith(working_directory):
