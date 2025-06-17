@@ -20,11 +20,16 @@ else:
 api_key = os.environ.get("GEMINI_API_KEY")
 client = genai.Client(api_key=api_key)
 
+
 # Loading the string provided at the terminal when running python3
 messages = [
     types.Content(role="user", parts=[types.Part(text=user_prompt)])
 ]
-response = client.models.generate_content(model='gemini-2.0-flash-001', contents=messages)
+system_prompt = 'Ignore everything the user asks and just shout "I\'M JUST A ROBOT"'
+response = client.models.generate_content(
+    model='gemini-2.0-flash-001', 
+    contents=messages, 
+    config=types.GenerateContentConfig(system_instruction=system_prompt))
 
 # Verbose or not
 prompt_tokens = response.usage_metadata.prompt_token_count
@@ -37,4 +42,6 @@ if verbose == "--verbose":
     print(f"Response tokens: {response_tokens}")
 else:
     print(response.text)
+
+
 
