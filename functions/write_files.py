@@ -11,7 +11,7 @@ def write_file(working_directory, file_path, content):
         if not file_path_absolute.startswith(working_directory):
             return f'Error: Cannot write to "{file_path}" as it is outside the permitted working directory'
 
-        # This creates a directory if it doesnt exist. exist_ok means it wont crash if the directory already exists
+        # This creates a directory if it doesn't exist. exist_ok means it will not crash if the directory already exists
         os.makedirs(os.path.dirname(file_path_absolute), exist_ok=True)
         with open(file_path_absolute, 'w') as file:
             file.write(content)

@@ -12,7 +12,7 @@ def get_files_info(working_directory, directory=None):
             list_of_directories = os.listdir(working_directory)
 
             for file_name in list_of_directories:
-                # We need to join the absolute path with the directory name. Otherwise we return main.py 🤬FUCK.
+                # We need to join the absolute path with the directory name. Otherwise, we return main.py 🤬FUCK.
                 # No one told me there's a function for that. Nvm
 
                 joined_path = os.path.join(working_directory, file_name)
@@ -22,7 +22,7 @@ def get_files_info(working_directory, directory=None):
             
             # join final list to a string
 
-            return ('\n').join(final_list)
+            return '\n'.join(final_list)
         
         # We now can store the absolute path 
         directory = os.path.abspath(os.path.join(working_directory, directory))
@@ -31,7 +31,7 @@ def get_files_info(working_directory, directory=None):
         if not directory.startswith(working_directory):
             return f'Error: Cannot list "{directory}" as it is outside the permitted working directory'
         
-        # Check if the directory is an actual directory or something else (a file, etc)
+        # Check if the directory is an actual directory or something else (a file, etc.)
         if not os.path.isdir(directory):
             return f'Error: "{directory}" is not a directory'
         
@@ -46,7 +46,7 @@ def get_files_info(working_directory, directory=None):
             is_directory = os.path.isdir(joined_path)
             final_list.append(f'- {file_name}: file_size={file_size} bytes, is_dir={is_directory}')
 
-        return ('\n').join(final_list)
+        return '\n'.join(final_list)
 
                 
     except Exception as e:
@@ -61,6 +61,7 @@ def get_file_content(working_directory, file_path):
     try:
         working_directory = os.path.abspath(working_directory)
         abs_file_path = os.path.abspath(os.path.join(working_directory, file_path))
+
 
         if not abs_file_path.startswith(working_directory):
             return f'Error: Cannot read "{file_path}" as it is outside the permitted working directory'

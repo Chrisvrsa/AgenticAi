@@ -3,3 +3,4 @@ venv/
 functions/__pycache__/
 calculator/pkg/__pycache__/
 *.pyc
+.idea/
