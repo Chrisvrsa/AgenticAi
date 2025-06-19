@@ -66,10 +66,14 @@ response = client.models.generate_content(
         system_instruction=system_prompt))
 #//
 
-function_call_part = response.function_calls()
+function_call_part = response.function_calls
+
 # If not empty?
 if function_call_part:
-    print(f"Calling function: {function_call_part.name}({function_call_part.args})")
+    # Remember, lists can also store objects. In this case its returning an object inside a list!
+    func_name = function_call_part[0].name
+    func_arguments = function_call_part[0].args
+    print(f"Calling function: {func_name}({func_arguments})")
 else:
     print(response.text)
 
@@ -83,8 +87,7 @@ if verbose == "--verbose":
     print(f"User prompt: {user_prompt}")
     print(f"Prompt tokens: {prompt_tokens}")
     print(f"Response tokens: {response_tokens}")
-else:
-    print(response.text)
+
     
 
 
