@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 
-# Self-note, sys is system and it can load terminal arguments. [0] is the name of the file, each argument after that follows like a list
+# self-note, sys is system and it can load terminal arguments. [0] is the name of the file, each argument after that follows like a list
 load_dotenv()
 
 user_prompt = ""
@@ -16,22 +16,24 @@ if len(sys.argv) == 3:
 else:
     user_prompt = sys.argv[1]
 
-# Load the api key from the environment variable .env
+# load the api key from the environment variable .env
 api_key = os.environ.get("GEMINI_API_KEY")
 client = genai.Client(api_key=api_key)
 
 
-# Loading the string provided at the terminal when running python3
+# loading the string provided at the terminal when running python3
 messages = [
     types.Content(role="user", parts=[types.Part(text=user_prompt)])
 ]
 
-# First function schema. This tells the AI what to do. Not define the function.
+# the first parameter is optional, schema only tells the AI what it can alter. We provide its working directory for safety.
 schema_get_files_info = types.FunctionDeclaration(
     name="get_files_info",
     description="Lists files in the specified directory along with their sizes, constrained to the working directory.",
+    # creates a dict (JSON)
     parameters=types.Schema(
         type=types.Type.OBJECT,
+        # properties in a key value pair. "directory" holds the value type of schema (blueprint.)
         properties={
             "directory": types.Schema(
                 type=types.Type.STRING,
@@ -41,10 +43,64 @@ schema_get_files_info = types.FunctionDeclaration(
     ),
 )
 
+# this file path is not optional. Unlike the first schema
+schema_get_file_content = types.FunctionDeclaration(
+    name="get_file_content",
+    description="Reads the contents of a specified file within the working directory, up to 10,000 characters.",
+    parameters=types.Schema(
+        type=types.Type.OBJECT,
+        properties={
+            "file_path": types.Schema(
+                type=types.Type.STRING,
+                description="The relative path to the file you want to read."
+            )
+        },
+        required=["file_path"]
+    )
+)
+
+schema_run_python_file = types.FunctionDeclaration(
+    name="run_python_file",
+    description="Executes a specified Python file within the working directory and returns its output or any error messages.",
+    parameters=types.Schema(
+        type=types.Type.OBJECT,
+        properties={
+            "file_path": types.Schema(
+                type=types.Type.STRING,
+                description="The relative path to the file you want to execute"
+            )
+        },
+        required=["file_path"]
+    )
+)
+
+schema_write_file = types.FunctionDeclaration(
+    name="write_file",
+    description="Writes the given string content to a specified file within the working directory, creating any missing folders if needed.",
+    parameters=types.Schema(
+        type=types.Type.OBJECT,
+        properties={
+            "file_path": types.Schema(
+                type=types.Type.STRING,
+                description="The relative path to the file you want to write to."
+            ),
+            "content": types.Schema(
+                type=types.Type.STRING,
+                description="The content you want to write into the file"
+            )
+        },
+        required=["file_path", "content"]
+
+    )
+)
+
 available_functions = types.Tool(
     # list
     function_declarations=[
-        schema_get_files_info
+        schema_get_files_info,
+        schema_get_file_content,
+        schema_run_python_file,
+        schema_write_file
     ]
 )
 # Change system prompt here
@@ -54,6 +110,9 @@ You are a helpful AI coding agent.
 When a user asks a question or makes a request, make a function call plan. You can perform the following operations:
 
 - List files and directories
+- Read file contents
+- Execute Python files with optional arguments
+- Write or overwrite files
 
 All paths you provide should be relative to the working directory. You do not need to specify the working directory in your function calls as it is automatically injected for security reasons.
 """
@@ -67,10 +126,8 @@ response = client.models.generate_content(
 #//
 
 function_call_part = response.function_calls
-
 # If not empty?
 if function_call_part:
-    # Remember, lists can also store objects. In this case its returning an object inside a list!
     func_name = function_call_part[0].name
     func_arguments = function_call_part[0].args
     print(f"Calling function: {func_name}({func_arguments})")
@@ -87,8 +144,3 @@ if verbose == "--verbose":
     print(f"User prompt: {user_prompt}")
     print(f"Prompt tokens: {prompt_tokens}")
     print(f"Response tokens: {response_tokens}")
-
-    
-
-
-
