@@ -3,6 +3,7 @@ import sys
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
+from functions.call_function import call_function
 
 # self-note, sys is system and it can load terminal arguments. [0] is the name of the file, each argument after that follows like a list
 load_dotenv()
@@ -128,9 +129,14 @@ response = client.models.generate_content(
 function_call_part = response.function_calls
 # If not empty?
 if function_call_part:
-    func_name = function_call_part[0].name
-    func_arguments = function_call_part[0].args
-    print(f"Calling function: {func_name}({func_arguments})")
+    result = call_function(function_call_part[0], verbose=(verbose == "--verbose"))
+
+    # Make sure result has usable content
+    if not result.parts or not hasattr(result.parts[0], "function_response"):
+        raise Exception("Fatal: call_function returned malformed content.")
+
+    if verbose == "--verbose":
+        print(f"-> {result.parts[0].function_response.response}")   
 else:
     print(response.text)
 
